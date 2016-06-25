@@ -9,7 +9,7 @@ server {
     error_log /var/nginx/logs/app/error.log debug;
 
     location / {
-        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.php${DOLLAR}is_args${DOLLAR}args;
+        try_files $uri $uri/ /index.php$is_args$args;
     }
 
     location = /favicon.ico { access_log off; log_not_found off; }
@@ -17,18 +17,18 @@ server {
 
     client_max_body_size 100m;
 
-    location ~ \.php${DOLLAR} {
-        fastcgi_split_path_info ^(.+?\.php)(/.*)${DOLLAR};
-        if (!-f ${DOLLAR}document_root${DOLLAR}fastcgi_script_name) {
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        if (!-f $document_root$fastcgi_script_name) {
             return 404;
         }
 
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME ${DOLLAR}document_root${DOLLAR}fastcgi_script_name;
-        fastcgi_param PATH_INFO ${DOLLAR}fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED ${DOLLAR}document_root${DOLLAR}fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
 
-        fastcgi_pass ${PHP_APP_HOST}:9000;
+        fastcgi_pass ${PHP_APP_HOST}:${PHP_APP_PORT};
         fastcgi_index index.php;
     }
 
