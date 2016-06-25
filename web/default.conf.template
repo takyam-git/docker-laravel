@@ -1,0 +1,39 @@
+server {
+    listen 80 default;
+    server_name _;
+    root /var/www/html/app/public;
+    index index.php;
+    charset utf-8;
+
+    access_log /var/nginx/logs/app/access.log;
+    error_log /var/nginx/logs/app/error.log debug;
+
+    location / {
+        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.php${DOLLAR}is_args${DOLLAR}args;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    client_max_body_size 100m;
+
+    location ~ \.php${DOLLAR} {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)${DOLLAR};
+        if (!-f ${DOLLAR}document_root${DOLLAR}fastcgi_script_name) {
+            return 404;
+        }
+
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME ${DOLLAR}document_root${DOLLAR}fastcgi_script_name;
+        fastcgi_param PATH_INFO ${DOLLAR}fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED ${DOLLAR}document_root${DOLLAR}fastcgi_path_info;
+
+        fastcgi_pass ${PHP_APP_HOST}:9000;
+        fastcgi_index index.php;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+
