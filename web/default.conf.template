@@ -1,12 +1,12 @@
 server {
     listen 80 default;
     server_name _;
-    root /var/www/html/app/public;
+    root ${APP_DOCUMENT_ROOT_PATH};
     index index.php;
     charset utf-8;
 
-    access_log /var/nginx/logs/app/access.log;
-    error_log /var/nginx/logs/app/error.log debug;
+    access_log ${NGINX_LOG_DIR_PATH}/access.log;
+    error_log ${NGINX_LOG_DIR_PATH}/error.log debug;
 
     location / {
         try_files $uri $uri/ /index.php$is_args$args;

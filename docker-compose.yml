@@ -1,31 +1,55 @@
 version: '2'
 services:
+
+### Web Server Container ###########################
+
   web:
     build: ./web
+    depends_on:
+      - php
     ports:
       - 80:80
-    links:
-      - php
+    env_file:
+      - ./app.env
     environment:
+      - APP_DOCUMENT_ROOT_PATH=/var/www/html/app/public
+      - NGINX_LOG_DIR_PATH=/var/log/nginx/app
       - PHP_APP_HOST=php
       - PHP_APP_PORT=9000
-    command: /bin/sh -c "envsubst '$$PHP_APP_HOST$$PHP_APP_PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    command: /bin/sh -c "envsubst '$$APP_DOCUMENT_ROOT_PATH$$NGINX_LOG_DIR_PATH$$PHP_APP_HOST$$PHP_APP_PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     volumes:
       - ./app:/var/www/html/app
-      - nginx-logs:/var/nginx/logs/app
+      - nginx-logs:/var/log/nginx/app
     networks:
       - frontend-tier
+
+### PHP-FPM Container ##############################
+
   php:
-    image: php:7-fpm-alpine
-    expose:
-      - 9000
+    build: ./php
+    env_file:
+      - ./app.env
+    command: /bin/sh -c "php /var/www/html/app/artisan migrate && php-fpm"
     volumes:
       - ./app:/var/www/html/app
+    external_links:
+      - database
+      - redis
     networks:
+      - outside
       - frontend-tier
+
+### Volumes Setings ################################
+
 volumes:
   nginx-logs:
     driver: local
+
+### Network Settings ###############################
+
 networks:
   frontend-tier:
     driver: bridge
+  outside:
+    external:
+      name: datastore-network

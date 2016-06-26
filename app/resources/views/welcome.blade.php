@@ -39,6 +39,11 @@
         <div class="container">
             <div class="content">
                 <div class="title">Laravel 5</div>
+                <p>{{ $message }}</p>
+                <form action="{{ url('/messages') }}" method="POST">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <button type="submit">CREATE</button>
+                </form>
             </div>
         </div>
     </body>
